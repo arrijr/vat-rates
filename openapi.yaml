@@ -1,0 +1,270 @@
+openapi: 3.0.0
+info:
+  title: VAT Rates API
+  version: "1.0.0"
+  description: >
+    EU, UK & Swiss VAT rates with product category support.
+    Returns standard, reduced, and zero rates per country — served from a
+    static database with zero downtime and no external dependencies.
+
+servers:
+  - url: https://vat-rates.vercel.app/api/v1
+    description: Production
+
+paths:
+  /rates/{country}:
+    get:
+      summary: Get all VAT rates for a country
+      description: >
+        Returns all VAT rates for the given ISO 3166-1 alpha-2 country code,
+        including standard rate, reduced rates, and category-specific rates.
+      operationId: getRatesByCountry
+      parameters:
+        - name: country
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 2
+            example: DE
+          description: ISO 3166-1 alpha-2 country code (uppercase)
+      responses:
+        "200":
+          description: VAT rates for the country
+          headers:
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CountryRatesResponse"
+              example:
+                country: "DE"
+                country_name: "Germany"
+                currency: "EUR"
+                standard_rate: 19
+                reduced_rates: [7]
+                super_reduced_rate: null
+                zero_rate: true
+                parking_rate: null
+                categories:
+                  food: 7
+                  books: 7
+                  medicine: 7
+                  digital_services: 19
+                  hotel: 7
+                  transport: 19
+                  restaurant: 19
+                  clothing: 19
+                  children_clothing: 19
+                  periodicals: 7
+                last_updated: "2026-01-01"
+        "404":
+          description: Country not found or not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Country 'XX' is not supported"
+                code: "COUNTRY_NOT_FOUND"
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /rates/{country}/{category}:
+    get:
+      summary: Get VAT rate for a specific product category
+      description: >
+        Returns the applicable VAT rate for a specific product category in the
+        given country. Useful for checkout flows and price calculations.
+      operationId: getRateByCategory
+      parameters:
+        - name: country
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 2
+            example: DE
+          description: ISO 3166-1 alpha-2 country code (uppercase)
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - food
+              - books
+              - medicine
+              - digital_services
+              - hotel
+              - transport
+              - restaurant
+              - clothing
+              - children_clothing
+              - periodicals
+          description: Product category
+          example: food
+      responses:
+        "200":
+          description: VAT rate for the category
+          headers:
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryRateResponse"
+              example:
+                country: "DE"
+                category: "food"
+                rate: 7
+                rate_type: "reduced"
+                standard_rate: 19
+        "404":
+          description: Country or category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                country_not_found:
+                  value:
+                    error: "Country 'XX' is not supported"
+                    code: "COUNTRY_NOT_FOUND"
+                category_not_found:
+                  value:
+                    error: "Category 'unknown' is not supported"
+                    code: "CATEGORY_NOT_FOUND"
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  countries_covered:
+                    type: integer
+                    example: 29
+                  timestamp:
+                    type: string
+                    format: date-time
+
+components:
+  schemas:
+    CountryRatesResponse:
+      type: object
+      properties:
+        country:
+          type: string
+          example: "DE"
+        country_name:
+          type: string
+          example: "Germany"
+        currency:
+          type: string
+          example: "EUR"
+        standard_rate:
+          type: number
+          example: 19
+        reduced_rates:
+          type: array
+          items:
+            type: number
+          example: [7]
+        super_reduced_rate:
+          type: number
+          nullable: true
+          example: null
+        zero_rate:
+          type: boolean
+          example: true
+        parking_rate:
+          type: number
+          nullable: true
+          example: null
+        categories:
+          type: object
+          properties:
+            food: { type: number, example: 7 }
+            books: { type: number, example: 7 }
+            medicine: { type: number, example: 7 }
+            digital_services: { type: number, example: 19 }
+            hotel: { type: number, example: 7 }
+            transport: { type: number, example: 19 }
+            restaurant: { type: number, example: 19 }
+            clothing: { type: number, example: 19 }
+            children_clothing: { type: number, example: 19 }
+            periodicals: { type: number, example: 7 }
+        last_updated:
+          type: string
+          format: date
+          example: "2026-01-01"
+
+    CategoryRateResponse:
+      type: object
+      properties:
+        country:
+          type: string
+          example: "DE"
+        category:
+          type: string
+          example: "food"
+        rate:
+          type: number
+          example: 7
+        rate_type:
+          type: string
+          enum: [standard, reduced, super_reduced, zero, parking]
+          example: "reduced"
+        standard_rate:
+          type: number
+          example: 19
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - code
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        details:
+          type: object
