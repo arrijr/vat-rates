@@ -1,33 +1,43 @@
 # RapidAPI Listing — VAT Rates API
 
-Copy-paste ready. Fields map 1:1 to RapidAPI Studio → General / Settings / Documentation.
+Copy-paste ready. Paste into RapidAPI Studio → General / Settings / Documentation / Security / Tests.
 
 ---
 
-## NAME
-```
-VAT Rates API
-```
+## Core fields (Studio → Settings)
 
-## CATEGORY
-```
-Business Software
-```
-(Secondary: Finance / Data)
+| Field | Value |
+|---|---|
+| **API Name** | `VAT Rates API` |
+| **Category** | `Business Software` (secondary: `Finance`, `Data`) |
+| **Base URL** | `https://vat-rates.vercel.app/api/v1` |
+| **Health Check URL** | `https://vat-rates.vercel.app/api/health` |
+| **RapidAPI Host** | `vat-rates.p.rapidapi.com` |
+| **Privacy URL** | `https://raw.githubusercontent.com/arrijr/vat-rates/main/PRIVACY.md` |
+| **Terms URL** | `https://raw.githubusercontent.com/arrijr/vat-rates/main/TERMS.md` |
+
+## Secret Headers & Parameters (Studio → Security)
+
+Add ONE row in the **Secret Headers & Parameters** table (NOT Transformations):
+
+| Name | Value | Type |
+|---|---|---|
+| `X-RapidAPI-Proxy-Secret` | `28d800d0-3af1-11f1-a61d-33d63b2e8b22` | `Header` |
+
+⚠️ Do NOT paste this into **Transformations** — that dialog needs a `request.header.name` dotted path and rejects plain header names with "Invalid format".
+
+---
 
 ## TAGLINE (54/60 chars)
+
 ```
 EU, UK & Swiss VAT rates with category-level accuracy
 ```
 
-## SHORT DESCRIPTION (appears under API name in search)
-```
-Look up VAT rates for 29 countries (27 EU + UK + Switzerland) by country or product category. Static database — sub-20ms responses, zero external dependencies, 100% uptime. Perfect for e-commerce checkouts, invoicing, and tax calculation.
-```
+## SHORT DESCRIPTION (≤160 chars — shown under the API name in search)
 
-## TAGS (10)
 ```
-vat, vat-rates, eu-vat, tax-rates, e-commerce, invoicing, sales-tax, europe, uk-vat, swiss-vat
+VAT rates for 29 countries (27 EU + UK + Switzerland). Static DB, sub-20ms, 100% uptime. Lookup by country or product category.
 ```
 
 ---
@@ -35,48 +45,41 @@ vat, vat-rates, eu-vat, tax-rates, e-commerce, invoicing, sales-tax, europe, uk-
 ## LONG DESCRIPTION
 
 ```markdown
-## What is VAT Rates API?
+# VAT Rates API — EU, UK & Switzerland, by Country and Product Category
 
-**VAT Rates API** returns the correct Value Added Tax rate for any of 29 countries — all 27 EU member states plus the United Kingdom and Switzerland — optionally filtered by product category (food, books, medicine, digital services, hotel, transport, restaurant, clothing, children's clothing, periodicals).
+Production-ready REST API for accurate **Value Added Tax rates** across **29 countries** — all 27 EU member states plus the United Kingdom and Switzerland. Lookup by country returns the full rate structure (standard, reduced, super-reduced, zero, parking). Lookup by product category returns the applicable rate for food, books, medicine, digital services, hotel, transport, restaurant, clothing, children's clothing, and periodicals.
 
-Unlike competitors that only cover the EU or return a single "standard rate," this API gives you **standard, reduced, super-reduced, zero, and parking rates** per country, plus a **category lookup** that tells you which of those applies to a specific product type. Served from a static, hand-curated database — no external calls, no downtime, no surprises.
+Static hand-curated database → no external calls, no upstream downtime, sub-20ms responses. Perfect for **e-commerce checkouts, invoicing, and tax calculation engines**.
 
-## Use Cases
+## Why developers choose this API
 
-- **E-Commerce Checkouts** — Calculate the correct VAT at checkout based on shipping country and product category. `GET /rates/DE/food` → 7% (reduced). `GET /rates/DE/digital_services` → 19% (standard).
-- **Invoicing & Accounting Software** — Auto-populate VAT fields on invoice templates. Perfect for B2C SaaS selling into multiple EU markets.
-- **Price Display** — Show gross prices correctly in each country. Groceries website selling to DE, FR, and NL? One API call per country.
-- **Tax Compliance Dashboards** — Compare VAT rates across EU, UK, and Switzerland in one place without maintaining your own rate tables.
+- ✅ **EU + UK + Switzerland in one API** — competitors (vatlayer, vatapi) cover EU only
+- ✅ **Product category lookup** — `GET /rates/DE/food` → 7% (reduced). No more guessing which reduced rate applies
+- ✅ **100% uptime** — static database, zero external dependencies, never breaks because an upstream went down
+- ✅ **Sub-20ms responses** — pure JSON lookup, served from Vercel Edge (fra1)
+- ✅ **Complete rate structure** — standard, reduced, super-reduced, zero, parking rates all exposed
+- ✅ **Predictable error codes** — `COUNTRY_NOT_FOUND`, `CATEGORY_NOT_FOUND`, `RATE_LIMITED` — build smart fallbacks
 
-## Why VAT Rates API?
+## Common use cases
 
-- ✅ **EU + UK + Switzerland** — 29 countries in one API. Competitors (vatlayer, vatapi) only cover the EU.
-- ✅ **Product category lookup** — Ask for the rate on `food`, `books`, or `digital_services` directly. No more guessing which of the three reduced rates applies.
-- ✅ **100% uptime** — Static database, no scraping, no upstream dependencies. Your checkout never breaks because our provider went down.
-- ✅ **Sub-20ms responses** — Pure JSON lookup, no database call, no external API.
-- ✅ **Complete rate structure** — Standard, reduced (multiple), super-reduced, zero, and parking rates — all exposed.
-- ✅ **Predictable error codes** — `COUNTRY_NOT_FOUND`, `CATEGORY_NOT_FOUND`, `RATE_LIMITED`. Build smart fallbacks.
-
-## Supported Countries (29)
-
-**EU (27):** AT, BE, BG, CY, CZ, DE, DK, EE, ES, FI, FR, GR, HR, HU, IE, IT, LT, LU, LV, MT, NL, PL, PT, RO, SE, SI, SK
-**Non-EU:** GB (United Kingdom), CH (Switzerland)
-
-## Supported Categories (10)
-
-`food`, `books`, `medicine`, `digital_services`, `hotel`, `transport`, `restaurant`, `clothing`, `children_clothing`, `periodicals`
+- **E-commerce checkouts** — calculate VAT at checkout based on shipping country and product category
+- **Invoicing & accounting software** — auto-populate VAT fields on invoices for B2C SaaS selling into multiple EU markets
+- **Tax compliance dashboards** — compare VAT rates across EU, UK, and Switzerland in a single pane
+- **Dropshipping & marketplace tools** — show correct gross prices per destination country
+- **Cross-border SaaS billing** — comply with EU digital services VAT rules without maintaining your own rate tables
 
 ## Endpoints
 
-### Get all rates for a country
+### GET /rates/{country}
+Returns all VAT rates for an ISO 3166-1 alpha-2 country code — standard, reduced, super-reduced, zero, parking, plus a per-category rate map. Example: `GET /rates/DE`.
 
-```
-GET /api/v1/rates/{country}
-```
+### GET /rates/{country}/{category}
+Returns the single applicable rate for a product category, classified as `standard`, `reduced`, `super_reduced`, `zero`, or `parking`. Example: `GET /rates/FR/books`.
 
-Returns standard, reduced, super-reduced, zero, and parking rates, plus the rate for every supported category.
+### GET /health
+Unguarded health check. Returns `{ status: "ok", countries_covered: 29, timestamp: ... }`.
 
-**Example Response (DE):**
+## Response format (example — `/rates/DE`)
 
 ```json
 {
@@ -104,113 +107,60 @@ Returns standard, reduced, super-reduced, zero, and parking rates, plus the rate
 }
 ```
 
-### Get the rate for a specific category
+## Supported countries (29)
 
+**European Union (27):** Austria, Belgium, Bulgaria, Croatia, Cyprus, Czech Republic, Denmark, Estonia, Finland, France, Germany, Greece, Hungary, Ireland, Italy, Latvia, Lithuania, Luxembourg, Malta, Netherlands, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden.
+
+**Non-EU:** United Kingdom (GB), Switzerland (CH).
+
+## Supported product categories (10)
+
+`food`, `books`, `medicine`, `digital_services`, `hotel`, `transport`, `restaurant`, `clothing`, `children_clothing`, `periodicals`.
+
+## FAQ
+
+**Is this API free?** Yes — the BASIC plan gives you 500 requests per month at no cost. Paid tiers start at $9/month.
+
+**How often is the data updated?** Rates are reviewed every 6 months (April and October) and after any announced rate change. Each response includes a `last_updated` field.
+
+**Where does the data come from?** The European Commission's VAT Taxes Database, HMRC (United Kingdom), and ESTV (Switzerland).
+
+**Do you cover regional rates (e.g. Madeira, Canary Islands, Åland)?** Not in v1 — responses are at the country level. Regional special zones are planned for v2.
+
+**Is this legal/tax advice?** No. The API returns published statutory rates as a data service. It is not a substitute for advice from a qualified tax professional.
+
+**What is the rate limit?** 120 requests per minute (sliding window) on every plan; monthly quotas follow your subscription tier.
+
+**How fast is it?** Sub-20ms p95 on the Vercel Frankfurt (fra1) region. No database calls, no upstream API calls.
+
+## Keywords
+
+vat rates api, eu vat api, vat rates by country, vat rate lookup, sales tax api, european vat api, uk vat rates, swiss vat rates, vat by product category, digital services vat, e-commerce vat, invoicing vat api, static vat database, cross-border tax api, vat compliance, oss vat, moss vat, b2c vat api.
+
+## Disclaimer
+
+VAT Rates API returns statutory rates published by government sources. It does not constitute tax, legal, or financial advice. Users are responsible for verifying rates against official publications before using them for tax filings, invoicing, or price display. No warranty of accuracy, completeness, or fitness for a particular purpose is given; see TERMS.md for full liability limits.
 ```
-GET /api/v1/rates/{country}/{category}
-```
 
-Returns just the applicable rate and classifies it as `standard`, `reduced`, `super_reduced`, `zero`, or `parking`.
+---
 
-**Example Response (DE / food):**
-
-```json
-{
-  "country": "DE",
-  "category": "food",
-  "rate": 7,
-  "rate_type": "reduced",
-  "standard_rate": 19
-}
-```
-
-## Quick Start
+## Code examples
 
 **JavaScript**
-```
-// Get all VAT rates for Germany
-const res = await fetch('https://vat-rates.p.rapidapi.com/api/v1/rates/DE', {
+```javascript
+const res = await fetch('https://vat-rates.p.rapidapi.com/api/v1/rates/DE/food', {
   headers: {
     'X-RapidAPI-Key': 'YOUR_RAPIDAPI_KEY',
     'X-RapidAPI-Host': 'vat-rates.p.rapidapi.com'
   }
 });
 const data = await res.json();
-console.log(`Standard rate: ${data.standard_rate}%`);
-console.log(`Food rate: ${data.categories.food}%`);
+console.log(`${data.category} in ${data.country}: ${data.rate}% (${data.rate_type})`);
 ```
 
 **Python**
-```
-import requests
-
-res = requests.get(
-    'https://vat-rates.p.rapidapi.com/api/v1/rates/DE/food',
-    headers={
-        'X-RapidAPI-Key': 'YOUR_RAPIDAPI_KEY',
-        'X-RapidAPI-Host': 'vat-rates.p.rapidapi.com',
-    }
-)
-data = res.json()
-print(f"Food VAT in Germany: {data['rate']}% ({data['rate_type']})")
-```
-
-**cURL**
-```
-curl "https://vat-rates.p.rapidapi.com/api/v1/rates/FR/books" \
-  -H "X-RapidAPI-Key: YOUR_RAPIDAPI_KEY" \
-  -H "X-RapidAPI-Host: vat-rates.p.rapidapi.com"
-```
-
-## Error Codes
-
-| Code | HTTP | Meaning |
-|---|---|---|
-| `COUNTRY_NOT_FOUND` | 404 | Country code is not supported (not in the 29-country list) |
-| `CATEGORY_NOT_FOUND` | 404 | Category is not one of the 10 supported values |
-| `RATE_LIMITED` | 429 | Too many requests — respect the `Retry-After` header |
-| `FORBIDDEN` | 403 | Request did not come through RapidAPI proxy |
-
-## Rate Limits
-
-Soft per-minute limit: **120 requests/minute** per API key (sliding window). Monthly quotas follow your subscribed plan.
-
-## About the Data
-
-Rates are sourced from the **European Commission's VAT Taxes Database**, **HMRC** (UK), and **ESTV** (Switzerland). Data is reviewed every 6 months (April + October) and after any announced rate change. The `last_updated` field in each response tells you when the country's data was last refreshed.
-```
-
----
-
-## CODE EXAMPLE (JavaScript / Node.js)
-
-```javascript
-// Get VAT rate for a specific product category
-const res = await fetch(
-  'https://vat-rates.p.rapidapi.com/api/v1/rates/FR/books',
-  {
-    headers: {
-      'X-RapidAPI-Key': 'YOUR_RAPIDAPI_KEY',
-      'X-RapidAPI-Host': 'vat-rates.p.rapidapi.com',
-    },
-  }
-);
-
-const data = await res.json();
-
-if (res.ok) {
-  console.log(`Books in ${data.country}: ${data.rate}% (${data.rate_type})`);
-  console.log(`Standard rate for comparison: ${data.standard_rate}%`);
-} else {
-  console.error(`Error: ${data.code} — ${data.error}`);
-}
-```
-
-## CODE EXAMPLE (Python)
-
 ```python
 import requests
-
 res = requests.get(
     'https://vat-rates.p.rapidapi.com/api/v1/rates/DE',
     headers={
@@ -218,14 +168,11 @@ res = requests.get(
         'X-RapidAPI-Host': 'vat-rates.p.rapidapi.com',
     },
 )
-
 data = res.json()
 print(f"{data['country_name']} standard VAT: {data['standard_rate']}%")
-print(f"Food: {data['categories']['food']}%, Books: {data['categories']['books']}%")
 ```
 
-## CODE EXAMPLE (curl)
-
+**cURL**
 ```bash
 curl "https://vat-rates.p.rapidapi.com/api/v1/rates/CH/hotel" \
   -H "X-RapidAPI-Key: YOUR_RAPIDAPI_KEY" \
@@ -234,21 +181,45 @@ curl "https://vat-rates.p.rapidapi.com/api/v1/rates/CH/hotel" \
 
 ---
 
-## PRICING TIERS (to enter in RapidAPI Studio → Plans)
+## Pricing (Studio → Plans)
 
-| Tier | Price | Quota | Hard cap? |
+| Tier | Price | Quota | Hard cap |
 |---|---|---|---|
 | **BASIC (Free)** | $0/mo | 500 req/mo | Yes |
-| **PRO** | $9/mo | 10,000 req/mo | soft, overage $2 / 1k |
-| **ULTRA** | $29/mo | 100,000 req/mo | soft, overage $1 / 1k |
-| **MEGA** | $99/mo | 1,000,000 req/mo | soft, overage $0.50 / 1k |
+| **PRO** | $9/mo | 10,000 req/mo | Soft — overage $2 / 1k |
+| **ULTRA** | $29/mo | 100,000 req/mo | Soft — overage $1 / 1k |
+| **MEGA** | $99/mo | 1,000,000 req/mo | Soft — overage $0.50 / 1k |
 
-**Rationale:** Static data = marginal server cost. Higher quotas than competitors (vatlayer gives 100/mo free; we give 500). Rate limit on all tiers: 120 req/min (sliding window).
+All plans: 120 req/min sliding-window rate limit.
 
 ---
 
-## SEO KEYWORDS (for RapidAPI search ranking)
+## Studio Tests (free plan = 2 tests max — default to 1)
 
-Primary: `vat rates api`, `eu vat rates`, `vat by country`
-Secondary: `sales tax api`, `vat rate lookup`, `european tax rates`, `uk vat rates`
-Long-tail: `vat rate by product category`, `vat rates eu uk switzerland`, `static vat database api`
+### Test 1 — Health check (MANDATORY)
+
+- **Location:** Frankfurt
+- **Schedule:** every 15 min
+- **Step 1 — HTTP GET**
+  - URL: `https://vat-rates.vercel.app/api/health`
+  - No headers needed (`/api/health` is unguarded)
+  - Variable name: `health`
+- **Step 2 — Assert Equals**
+  - Expression: `health.data.status` *(no `{{ }}` braces, use Studio's variable picker)*
+  - Value: `ok`
+
+Save → Run → must be green before publishing.
+
+### Test 2 — optional (only if adding a second test)
+
+Prefer a deterministic assertion (e.g. `GET /rates/XX` expecting 404 `COUNTRY_NOT_FOUND`) over live happy-path — upstream downtime cannot falsely fail a format-rejection test since this API has no upstream.
+
+---
+
+## Pre-Go-Live checklist
+
+1. ✅ Base URL set to `https://vat-rates.vercel.app/api/v1`
+2. ✅ Secret Header `X-RapidAPI-Proxy-Secret` configured
+3. ✅ Privacy + Terms URLs pasted
+4. ✅ Health test green
+5. ✅ Playground smoketest: subscribe to own API, call `/rates/DE` via Try-It with a real Consumer key → expect 200 (verifies Gateway → Secret Injection → Origin chain)
